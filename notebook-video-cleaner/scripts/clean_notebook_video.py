@@ -62,8 +62,10 @@ def welcome_time(path):
 
 def find_start(path):
     w = welcome_time(path)
-    base = (w if w is not None else 0.0) + 2.5   # the welcome sentence lasts several seconds
-    gaps = [g for g in silences(path, 0, 40) if g[0] > base and g[1] - g[0] >= 0.3]
+    # welcome lines vary ('Welcome to this analysis' is ~1s, longer intros run ~8s);
+    # cut at the first clear pause (0.4s+) that follows the word welcome
+    base = w + 0.8 if w is not None else 2.5
+    gaps = [g for g in silences(path, 0, 40) if g[0] > base and g[1] - g[0] >= 0.4]
     if not gaps:
         return 0.0, 'no intro pause found, start kept'
     s, e = gaps[0]

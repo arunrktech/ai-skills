@@ -32,7 +32,7 @@ The source tool's own branding (NotebookLM watermark and end card) is left in pl
 
 ## Reference values (1280x720 NotebookLM export)
 
-1. Intro sentence runs roughly 0 to 8.5s and ends on a 0.3 to 0.5s pause.
+1. The welcome line varies: about 1s (Welcome to this analysis) up to about 8.5s, and ends on a 0.4s or longer pause.
 2. The NotebookLM watermark sits bottom right, so the logo defaults to top right and the AI label to bottom left.
 3. The title card is on screen for roughly the first 10s, which makes 1.0s a good thumbnail frame.
 
@@ -103,8 +103,10 @@ def welcome_time(path):
 
 def find_start(path):
     w = welcome_time(path)
-    base = (w if w is not None else 0.0) + 2.5   # the welcome sentence lasts several seconds
-    gaps = [g for g in silences(path, 0, 40) if g[0] > base and g[1] - g[0] >= 0.3]
+    # welcome lines vary ('Welcome to this analysis' is ~1s, longer intros run ~8s);
+    # cut at the first clear pause (0.4s+) that follows the word welcome
+    base = w + 0.8 if w is not None else 2.5
+    gaps = [g for g in silences(path, 0, 40) if g[0] > base and g[1] - g[0] >= 0.4]
     if not gaps:
         return 0.0, 'no intro pause found, start kept'
     s, e = gaps[0]
